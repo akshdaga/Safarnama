@@ -1,0 +1,652 @@
+/* ==========================================================================
+   YATRA TOURISM PLATFORM • DEDICATED TRAVEL WRAPPED STYLES
+   Spotify Wrapped + Strava Year in Sport Story Aesthetics
+   ========================================================================== */
+
+.wrapped-full-experience {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #0F172A;
+  color: #FFFFFF;
+  z-index: 20000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Top Multi-Segment Story Progress Bar */
+.wrapped-story-progress-bar {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 50;
+}
+
+.wsp-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wsp-bar.active {
+  background: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+}
+
+/* Top Controls */
+.wrapped-top-controls {
+  position: absolute;
+  top: 24px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+}
+
+.wtc-brand {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wrapped-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.wrapped-close-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+}
+
+/* Slide Viewport & Layout */
+.wrapped-slide-viewport {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.wrapped-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  animation: wrappedFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes wrappedFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.slide-content-center {
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+.slide-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #90CDF4;
+  text-transform: uppercase;
+}
+
+.slide-hero-title {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #FFFFFF;
+}
+
+.slide-hero-subtitle {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #CBD5E0;
+}
+
+.slide-giant-number {
+  font-family: var(--font-display);
+  font-size: 88px;
+  font-weight: 900;
+  color: #F6E05E;
+  line-height: 0.9;
+  text-shadow: 0 4px 20px rgba(246, 224, 94, 0.3);
+}
+
+.slide-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.slide-desc {
+  font-size: 14px;
+  color: #CBD5E0;
+  line-height: 1.5;
+}
+
+/* Strava Radial SVG Circle */
+.strava-radial-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 12px 0;
+}
+
+.strava-svg-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 14;
+}
+
+.ring-fg {
+  fill: none;
+  stroke: #ED8936;
+  stroke-width: 14;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.strava-ring-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sr-val {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.sr-sub {
+  font-size: 10px;
+  font-weight: 800;
+  color: #CBD5E0;
+  letter-spacing: 1px;
+}
+
+.strava-tri-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.stm-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stm-box strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 900;
+  color: #63B3ED;
+}
+
+.stm-box span {
+  font-size: 11px;
+  color: #A0AEC0;
+}
+
+/* 4-Card Stats Grid */
+.stats-cards-4grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.stat-clean-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.scc-icon {
+  font-size: 22px;
+}
+
+.scc-val {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 900;
+  color: #F6E05E;
+}
+
+.scc-label {
+  font-size: 11px;
+  color: #CBD5E0;
+  font-weight: 600;
+}
+
+/* Archetype Slide */
+.archetype-badge-pill {
+  background: #C05621;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.archetype-hero-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.archetype-hero-desc {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #E2E8F0;
+  font-style: italic;
+}
+
+.archetype-meta-pill {
+  font-size: 11px;
+  color: #A0AEC0;
+}
+
+/* Category Bars */
+.category-ring-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 14px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cr-pct {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 900;
+  color: #68D391;
+}
+
+.cr-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #E2E8F0;
+}
+
+.category-bars-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cat-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cbi-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #CBD5E0;
+}
+
+.cbi-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cbi-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* Hidden Photos Strip */
+.hidden-photos-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.hp-card {
+  height: 140px;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.hp-tag {
+  background: rgba(0, 0, 0, 0.7);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.hp-name {
+  font-weight: 800;
+  font-size: 11.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Favourite Place */
+.fav-place-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.fav-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #F6E05E;
+}
+
+.fav-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #E2E8F0;
+}
+
+.fav-tip-box {
+  background: rgba(192, 86, 33, 0.35);
+  border: 1px solid #C05621;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #FBD38D;
+}
+
+/* Longest Day */
+.longest-day-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.lds-item {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lds-val {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  color: #63B3ED;
+}
+
+.lds-label {
+  font-size: 10.5px;
+  color: #CBD5E0;
+}
+
+.longest-corridor-box {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 10px 14px;
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+}
+
+.lcb-label {
+  font-weight: 800;
+  color: #A0AEC0;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.lcb-path {
+  color: #F7FAFC;
+  font-weight: 700;
+}
+
+/* Travel Map Pins List */
+.travel-map-pins-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.tmp-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tmp-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3182CE;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Clean Shareable Summary Card (Strava / Spotify Style) */
+.shareable-wrapped-card {
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(135deg, #1A365D 0%, #0F172A 100%);
+  border: 1.5px solid #2B6CB0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+.swc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 800;
+  color: #90CDF4;
+  letter-spacing: 0.5px;
+}
+
+.swc-score {
+  background: #F6E05E;
+  color: #1A202C;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.swc-hero-val {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.swc-hero-sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: #CBD5E0;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.swc-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #A0AEC0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 10px;
+}
+
+.final-statement {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.final-actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.btn-outline-light {
+  background: transparent;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #FFFFFF;
+}
+
+.btn-light {
+  background: #FFFFFF;
+  color: #1A202C;
+  border-color: #FFFFFF;
+}
+
+.btn-light:hover {
+  background: #E2E8F0;
+}
+
+/* Nav Hotspots for easy clicking left/right */
+.wrapped-nav-hotspot {
+  position: absolute;
+  top: 60px;
+  bottom: 60px;
+  width: 20%;
+  z-index: 5;
+  cursor: pointer;
+}
+
+.wrapped-nav-hotspot.left {
+  left: 0;
+}
+
+.wrapped-nav-hotspot.right {
+  right: 0;
+}
+
+/* Bottom Bar */
+.wrapped-bottom-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+}
+
+.wbb-counter {
+  font-size: 12px;
+  font-weight: 700;
+  color: #A0AEC0;
+}

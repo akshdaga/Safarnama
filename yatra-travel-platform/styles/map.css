@@ -1,0 +1,965 @@
+/* ==========================================================================
+   RAJASTHAN TOURISM • JAIPUR INTELLIGENCE PLATFORM
+   GIS Map Viewport, Spatial Pins & Compact Bottom Preview Sheet
+   ========================================================================== */
+
+.map-viewport {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background-color: #E2E8F0;
+}
+
+.map-briefing {
+  position: absolute;
+  top: 106px;
+  left: 18px;
+  z-index: 450;
+  width: min(300px, calc(100% - 36px));
+  padding: 16px 78px 16px 16px;
+  background: rgba(255, 252, 246, 0.94);
+  border: 1px solid rgba(141, 78, 42, 0.28);
+  border-left: 4px solid #C96B35;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(76, 56, 36, 0.15);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.map-mode .map-briefing {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.map-briefing-mascot {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 62px;
+  height: 70px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 5px 4px rgba(76, 56, 36, 0.2));
+  pointer-events: none;
+}
+
+.map-briefing-kicker {
+  color: #A65328;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+}
+
+.map-briefing h2 {
+  margin-top: 4px;
+  color: #35251D;
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.map-briefing p {
+  margin-top: 5px;
+  color: #6D5A4B;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.map-trip-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 12px;
+  color: #754B2B;
+}
+
+.map-trip-stats strong {
+  font-family: var(--font-display);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.map-trip-stats span {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.map-briefing-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.map-briefing-tags span {
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: #F7E8D4;
+  color: #754B2B;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.map-briefing-action {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #8D4E2A;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.map-briefing-action:hover {
+  background: #6F3C22;
+}
+
+.map-traveler-note {
+  position: absolute;
+  top: 68px;
+  right: 18px;
+  z-index: 450;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 250px;
+  padding: 7px 10px 7px 7px;
+  background: rgba(255, 252, 246, 0.92);
+  border: 1px solid rgba(141, 78, 42, 0.2);
+  border-radius: 9px;
+  box-shadow: 0 6px 16px rgba(76, 56, 36, 0.12);
+  backdrop-filter: blur(7px);
+}
+
+.map-traveler-note img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 7px;
+  background: #F7E8D4;
+}
+
+.map-traveler-note div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.map-traveler-note strong {
+  color: #503021;
+  font-size: 10px;
+}
+
+.map-traveler-note span {
+  color: #806A5B;
+  font-size: 8.5px;
+  line-height: 1.2;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Base custom pin styles for Leaflet */
+.custom-gov-pin {
+  background: transparent;
+  border: none;
+}
+
+.itinerary-drop-pin {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #FFFFFF;
+  border-radius: 50% 50% 50% 0;
+  background: #2563EB;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.35);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.map-landmark-pin {
+  position: relative;
+  width: 150px;
+  height: 78px;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+  user-select: none;
+}
+
+.map-landmark-pin:hover {
+  transform: translateY(-4px) scale(1.04);
+  z-index: 1000 !important;
+}
+
+.map-landmark-art {
+  position: absolute;
+  left: 0;
+  bottom: 18px;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border: 3px solid #FFFFFF;
+  border-radius: 50%;
+  background: #FFF8ED;
+  box-shadow: 0 4px 12px rgba(76, 56, 36, 0.22);
+}
+
+.map-landmark-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(141, 78, 42, 0.2);
+  border-radius: inherit;
+}
+
+.map-landmark-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.map-landmark-label {
+  position: absolute;
+  left: 36px;
+  bottom: 0;
+  max-width: 114px;
+  overflow: hidden;
+  padding: 5px 8px 5px 21px;
+  border: 1px solid rgba(141, 78, 42, 0.2);
+  border-radius: 7px;
+  background: #FFFDF8;
+  color: #503021;
+  box-shadow: 0 3px 9px rgba(76, 56, 36, 0.14);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-landmark-label span {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #FFFFFF;
+  background: #D6673D;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 8px;
+  line-height: 14px;
+}
+
+.itinerary-drop-pin:hover {
+  background: #1D4ED8;
+  transform: rotate(-45deg) scale(1.08);
+}
+
+.itinerary-drop-number {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  transform: rotate(45deg);
+}
+
+/* Professional Government GIS Marker Pin */
+.gov-map-pin {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  user-select: none;
+}
+
+.gov-map-pin:hover {
+  transform: translateY(-2px) scale(1.05);
+  z-index: 9999 !important;
+}
+
+.gov-map-pin.active-pin {
+  transform: translateY(-3px) scale(1.08);
+  z-index: 10000 !important;
+}
+
+.gov-pin-badge {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: var(--pin-bg, #17212B);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  border: 1.5px solid #FFFFFF;
+  position: relative;
+}
+
+.gov-pin-verified-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #059669;
+  border: 1.5px solid #FFFFFF;
+}
+
+.gov-pin-label {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #17212B;
+  font-family: var(--font-sans);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.gov-pin-rating {
+  color: #B45309;
+  font-weight: 800;
+  font-size: 10.5px;
+}
+
+/* User Location Precision GIS Marker */
+.user-location-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.user-pulse-ring {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(2, 132, 199, 0.25);
+  animation: userPulse 2s infinite ease-out;
+}
+
+.user-center-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #0284C7;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes userPulse {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Route Endpoints */
+.gov-route-endpoint {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 10px;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.gov-route-start {
+  background: #059669;
+}
+
+.gov-route-end {
+  background: #C2410C;
+}
+
+/* Spatial Custom Popup */
+.gov-spatial-popup .leaflet-popup-content-wrapper {
+  background: #FFFFFF;
+  border-radius: 6px;
+  padding: 0;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+}
+
+.gov-spatial-popup .leaflet-popup-content {
+  margin: 0;
+  width: 270px !important;
+}
+
+.gov-spatial-popup .leaflet-popup-tip {
+  background: #FFFFFF;
+}
+
+.gov-popup-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-popup-img {
+  height: 100px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.gov-popup-source {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(23, 33, 43, 0.9);
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.gov-popup-body {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gov-popup-title {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #17212B;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.gov-popup-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.gov-popup-desc {
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.gov-popup-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+  padding-top: 6px;
+  border-top: 1px solid #F1F5F9;
+}
+
+/* Map Compact Bottom Preview Sheet */
+.map-preview-sheet {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, calc(100% - 32px));
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+  z-index: 1000;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+  animation: slideUpPreview 0.2s ease-out;
+}
+
+@keyframes slideUpPreview {
+  from { opacity: 0; transform: translate(-50%, 15px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.preview-sheet-content {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  position: relative;
+}
+
+.preview-sheet-img {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.preview-sheet-verified {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #059669;
+  color: #FFFFFF;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.preview-sheet-info {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.preview-sheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.preview-sheet-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: #17212B;
+  margin-bottom: 2px;
+}
+
+.preview-sheet-meta {
+  font-size: 11.5px;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.preview-sheet-why {
+  margin-top: 4px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-left: 2.5px solid #059669;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #334155;
+}
+
+.preview-sheet-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #F1F5F9;
+}
+
+.preview-close-btn, .mps-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: #FFFFFF;
+  color: #17212B;
+  border: 1px solid var(--border-bold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: all 0.15s ease;
+  z-index: 100;
+}
+
+.preview-close-btn:hover, .mps-close-btn:hover {
+  background: #EDF2F7;
+  color: #000000;
+  border-color: #17212B;
+}
+
+/* Single Clean Map Layers Floating Bar */
+.map-floating-layers-bar {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-mode-label {
+  padding: 7px 9px;
+  color: #754B2B;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: rgba(255, 252, 246, 0.9);
+  border: 1px solid rgba(141, 78, 42, 0.2);
+  border-radius: 6px;
+}
+
+.map-floating-layers-btn {
+  background: #FFFFFF;
+  border: 1px solid var(--border-bold);
+  border-radius: 7px;
+  padding: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: #754B2B;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-floating-layers-btn:hover {
+  background: #F8FAFC;
+  border-color: var(--primary);
+}
+
+/* Selected Marker Compact Bottom Sheet */
+.selected-marker-sheet {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 32px));
+  background: #FFFFFF;
+  border: 1px solid var(--border-bold);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideUpSheet 0.2s ease-out;
+}
+
+@keyframes slideUpSheet {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.sms-content {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+  position: relative;
+}
+
+.sms-thumb {
+  width: 90px;
+  height: 80px;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.sms-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sms-title {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+.sms-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.sms-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.sms-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.sms-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #F8FAFC;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.sms-close-btn:hover {
+  background: #E2E8F0;
+  color: var(--primary);
+}
+
+/* Navigation Step Banner */
+.nav-step-banner {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  z-index: 500;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.nav-tag-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.nav-distance {
+  font-weight: 800;
+  color: #17212B;
+  font-size: 11.5px;
+}
+
+.nav-time {
+  color: #64748B;
+  font-size: 11.5px;
+}
+
+.nav-instruction {
+  font-size: 11.5px;
+  color: #17212B;
+  font-weight: 600;
+}
+
+/* Map Bottom Zoom Controls */
+.map-bottom-controls {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.map-control-btn {
+  width: 32px;
+  height: 32px;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  font-size: 14px;
+  font-weight: 800;
+  color: #17212B;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.map-control-btn:hover {
+  background: #F8FAFC;
+  border-color: #94A3B8;
+}
+
+@media (max-width: 768px) {
+  .map-traveler-note {
+    display: none;
+  }
+
+  .map-briefing {
+    width: min(292px, calc(100% - 28px));
+    left: 14px;
+    top: 74px;
+  }
+
+  .preview-sheet-content {
+    grid-template-columns: 1fr;
+  }
+  .preview-sheet-img {
+    height: 110px;
+    min-height: 110px;
+  }
+  .map-preview-sheet {
+    bottom: 10px;
+    width: calc(100% - 20px);
+  }
+}
+
+/* ========================================================================= */
+/* GIS SPECIAL PINS & EMERGENCY MARKERS                                      */
+/* ========================================================================= */
+.gov-gem-pin {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1.5px solid #059669;
+  border-radius: 20px;
+  padding: 2px 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ggp-icon {
+  font-size: 14px;
+  margin-right: 4px;
+}
+
+.ggp-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.ggp-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #065F46;
+}
+
+.ggp-reduction {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #059669;
+}
+
+.gov-emergency-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  border: 2px solid white;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.gov-emergency-pin:hover {
+  transform: scale(1.15);
+}
+
+.gov-emergency-pin.police {
+  background: #1E40AF;
+}
+
+.gov-emergency-pin.hospital {
+  background: #DC2626;
+}
+
+.gep-icon {
+  font-size: 14px;
+}
+
+.emergency-sheet .police-header {
+  background: #1E40AF;
+  color: white;
+  padding: 10px 14px;
+}
+
+.emergency-sheet .hospital-header {
+  background: #DC2626;
+  color: white;
+  padding: 10px 14px;
+}
+
+.emergency-sheet .mps-badge {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mps-reduction-tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #059669;
+  background: #DCFCE7;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.mps-features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.mps-features-list span {
+  font-size: 10px;
+  background: #F1F5F9;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #475569;
+}
+

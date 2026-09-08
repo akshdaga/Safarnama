@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safarnama • Tourism Intelligence Portal</title>
+  <meta name="description" content="Safarnama Tourism Intelligence Portal — explore authentic heritage landmarks, interactive GIS maps, verified hidden gems, and safety-aware route guidance.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230F172A%22/><text y=%22.75em%22 x=%2250%25%22 text-anchor=%22middle%22 font-size=%2260%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22>S</text></svg>">
+
+  <!-- Leaflet CSS (Local Vendor with CDN fallback) -->
+  <link rel="stylesheet" href="vendor/leaflet.css">
+
+  <!-- Google Fonts: Plus Jakarta Sans (Clean Public Service UI) + Outfit (Heritage Typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Application Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/map.css">
+  <link rel="stylesheet" href="styles/sidebar.css">
+  <link rel="stylesheet" href="styles/reels.css">
+  <link rel="stylesheet" href="styles/modal.css">
+  <link rel="stylesheet" href="styles/gamification.css">
+  <link rel="stylesheet" href="styles/wrapped.css">
+</head>
+<body>
+  <!-- Canvas Confetti Overlay -->
+  <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99999;"></canvas>
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP UTILITY & ACCESSIBILITY BAR                                        -->
+  <!-- ========================================================================= -->
+  <div class="top-utility-bar">
+    <div class="tub-left">
+      <span class="tub-national-tag"><strong>Government of India</strong> • Ministry of Tourism • Tourism Intelligence Platform</span>
+    </div>
+
+    <div class="tub-right">
+      <!-- Search Input -->
+      <form class="tub-search-group" onsubmit="window.yatraApp.handleLandingSearch(event)">
+        <input type="text" id="topUtilitySearchInput" placeholder="Search heritage..." class="tub-search-input" autocomplete="off" />
+        <button type="submit" class="tub-search-btn" title="Search">Search</button>
+      </form>
+
+      <!-- Font Sizer (A- / A / A+) -->
+      <div class="font-size-controls">
+        <button type="button" class="font-btn" id="fontBtn_small" onclick="window.yatraApp.setFontSize('small')">A-</button>
+        <button type="button" class="font-btn active" id="fontBtn_normal" onclick="window.yatraApp.setFontSize('normal')">A</button>
+        <button type="button" class="font-btn" id="fontBtn_large" onclick="window.yatraApp.setFontSize('large')">A+</button>
+      </div>
+
+      <!-- Language Switcher -->
+      <div class="lang-toggle-group">
+        <button type="button" class="lang-btn active" id="langBtn_en" onclick="window.yatraApp.setLanguage('en')">English</button>
+        <button type="button" class="lang-btn" id="langBtn_hi" onclick="window.yatraApp.setLanguage('hi')">हिंदी</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN INSTITUTIONAL NAVIGATION HEADER                                   -->
+  <!-- ========================================================================= -->
+  <header class="main-portal-header">
+    <div class="portal-brand-block" onclick="window.location.hash = '#landing'">
+      <svg class="portal-logo-svg" width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="36" height="36" rx="8" fill="#0F172A"/>
+        <path d="M10 11L18 20L26 11" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18 20V26" stroke="#2563EB" stroke-width="2.75" stroke-linecap="round"/>
+        <circle cx="18" cy="8" r="2.2" fill="#2563EB"/>
+      </svg>
+      <div class="portal-brand-text">
+        <span class="pbt-title">SAFARNAMA</span>
+        <span class="pbt-subtitle">TOURISM INTELLIGENCE PLATFORM</span>
+      </div>
+    </div>
+
+    <!-- Multi-City Destination Selector Dropdown -->
+    <div class="header-destination-wrapper">
+      <label for="headerDestinationSelect" class="hd-label">Destination:</label>
+      <select id="headerDestinationSelect" class="header-dest-dropdown" onchange="window.yatraApp.switchDestination(this.value)">
+        <option value="jaipur" selected>Jaipur</option>
+        <option value="udaipur">Udaipur, Rajasthan</option>
+        <option value="jodhpur">Jodhpur, Rajasthan</option>
+        <option value="delhi">Delhi, NCR</option>
+        <option value="agra">Agra, Uttar Pradesh</option>
+        <option value="varanasi">Varanasi, Uttar Pradesh</option>
+        <option value="goa">Goa</option>
+        <option value="kerala">Kerala Backwaters</option>
+        <option value="manali">Manali, Himachal</option>
+      </select>
+    </div>
+
+    <!-- Center Primary Horizontal Navigation Tabs with Active Underline -->
+    <nav class="portal-nav-bar">
+      <a href="#landing" class="portal-nav-tab active" data-nav="landing">
+        Home
+      </a>
+      <a href="#explore" class="portal-nav-tab" data-nav="explore">
+        Explore
+      </a>
+      <a href="#map" class="portal-nav-tab" data-nav="map">
+        Map
+      </a>
+      <a href="#safety" class="portal-nav-tab" data-nav="safety">
+        Safety
+      </a>
+      <a href="#trips" class="portal-nav-tab" data-nav="trips">
+        Trips
+      </a>
+      <a href="#safarnama" class="portal-nav-tab" data-nav="safarnama">
+        Safarnama
+      </a>
+      <a href="#complaint-box" class="portal-nav-tab" data-nav="complaint-box">
+        Complaint Box
+      </a>
+      <a href="#tourism-intelligence" class="portal-nav-tab" data-nav="tourism-intelligence">
+        Intelligence
+      </a>
+    </nav>
+
+    <!-- Right Actions: Safarnama AI CTA & User Profile / Login -->
+    <div class="portal-right-actions">
+      <button type="button" class="btn btn-sm btn-primary" onclick="window.location.hash = '#ai-assistant'">
+        Safarnama AI
+      </button>
+      <div id="topNavAuthContainer" style="display: inline-flex; align-items: center; gap: 8px;">
+        <button type="button" class="btn btn-sm btn-outline" id="topNavLoginBtn" onclick="window.saffarnamaApp.openAuthModal('login')" style="font-weight: 700; border: 1.5px solid var(--border-medium); background: #FFFFFF; color: var(--primary);">
+          Sign In / Login
+        </button>
+        <button type="button" class="nav-user-pill hidden" id="topNavUserBtn" onclick="window.location.hash = '#profile'">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" class="nav-avatar-img" alt="User Avatar" />
+          <span id="topNavUserName">Kushal</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. LANDING PAGE VIEW (Hero Carousel, Live Ticker, 5-Pillar Core Strip)    -->
+  <!-- ========================================================================= -->
+  <section id="landingView" class="landing-page-container">
+
+    <!-- Hero Carousel Section (Matching SIH Screenshot 3) -->
+    <div class="hero-carousel-container">
+      
+      <!-- Slide 1: Hero Entry Point -->
+      <div class="carousel-slide active" style="background-image: url('https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=2000&q=85')">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <div class="carousel-pill">NATIONAL TOURISM INTELLIGENCE PLATFORM</div>
+          <h1 class="carousel-title">Where do you want to travel?</h1>
+          <p class="carousel-desc">Discover destinations beyond the obvious with real-time crowd pressure analysis, safety intelligence, and explainable 5-pillar recommendations.</p>
+          
+          <!-- Hero Search & Action Strip -->
+          <div class="hero-search-box">
+            <form onsubmit="window.yatraApp.handleLandingSearch(event)" class="hero-search-form" autocomplete="off">
+              <input type="text" id="heroDestinationSearch" placeholder="Search city, destination or experience (Jaipur, Udaipur, Jodhpur, Delhi...)" class="hero-search-input" oninput="window.yatraApp.handleSearchInput(this.value, 'heroSearchSuggestions')" onfocus="window.yatraApp.handleSearchInput(this.value, 'heroSearchSuggestions')" />
+              <button type="submit" class="btn btn-primary">Discover Places</button>
+            </form>
+            <div id="heroSearchSuggestions" class="hero-search-suggestions hidden"></div>
+          </div>
+
+          <div class="carousel-actions">
+            <button type="button" class="btn btn-primary btn-lg" onclick="window.yatraApp.startPlanningFlow()">Plan My Trip</button>
+            <button type="button" class="btn btn-secondary btn-lg" onclick="window.location.hash = '#explore'">Explore All Destinations</button>
+            <button type="button" class="btn btn-outline-light btn-lg" onclick="window.location.hash = '#tourism-intelligence'">Decision Support View</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Dedicated Hidden Gems -->
+      <div class="carousel-slide" style="background-image: url('https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=2000&q=85')">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <div class="carousel-pill">UNDER-DISCOVERED REDISTRIBUTION</div>
+          <h1 class="carousel-title">Secret Stepwells &<br>Artisan Heritage Clusters</h1>
+          <p class="carousel-desc">Discover Panna Meena Ka Kund, Maharani Ki Chhatri, Jagat Shiromani temple, and Bagru natural dye clusters with 75% less crowd congestion.</p>
+          <div class="carousel-actions">
+            <button type="button" class="btn btn-primary btn-lg" onclick="window.location.hash = '#hidden-jaipur'">Explore Hidden Gems</button>
+            <button type="button" class="btn btn-secondary btn-lg" onclick="window.location.hash = '#explore'">Browse All Places</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3: Safety Routes -->
+      <div class="carousel-slide" style="background-image: url('https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=2000&q=85')">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <div class="carousel-pill">TRAVEL SAFETY & GIS CORRIDORS</div>
+          <h1 class="carousel-title">Safety-Aware Corridor<br>Navigation & Support</h1>
+          <p class="carousel-desc">Contextual safety scoring, 24x7 tourist police desks, verified trauma healthcare, and accessibility monitoring across India.</p>
+          <div class="carousel-actions">
+            <button type="button" class="btn btn-primary btn-lg" onclick="window.location.hash = '#safety'">Open Travel Safety App</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Food & Culture -->
+      <div class="carousel-slide" style="background-image: url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=2000&q=85')">
+        <div class="carousel-overlay"></div>
+        <div class="carousel-content">
+          <div class="carousel-pill">LOCAL ECONOMIC DISCOVERY</div>
+          <h1 class="carousel-title">Master Artisans, Living Bazaars<br>& Heritage Culinary Trails</h1>
+          <p class="carousel-desc">Connect directly with certified master craftspeople in Bagru block-printing, Jaipur blue pottery, and royal meenakari jewelry.</p>
+          <div class="carousel-actions">
+            <button type="button" class="btn btn-primary btn-lg" onclick="window.location.hash = '#explore'">Explore Living Heritage</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel Navigation Arrows -->
+      <button type="button" class="carousel-arrow prev" onclick="window.yatraApp.prevHeroSlide()" title="Previous slide">❮</button>
+      <button type="button" class="carousel-arrow next" onclick="window.yatraApp.nextHeroSlide()" title="Next slide">❯</button>
+
+      <!-- Bottom Dots & Pause Dock -->
+      <div class="carousel-bottom-dock">
+        <div class="carousel-dots">
+          <span class="carousel-dot active" onclick="window.yatraApp.setHeroSlide(0)"></span>
+          <span class="carousel-dot" onclick="window.yatraApp.setHeroSlide(1)"></span>
+          <span class="carousel-dot" onclick="window.yatraApp.setHeroSlide(2)"></span>
+          <span class="carousel-dot" onclick="window.yatraApp.setHeroSlide(3)"></span>
+        </div>
+        <button type="button" class="carousel-pause-btn" id="carouselPauseBtn" onclick="window.yatraApp.toggleCarouselPause()">Pause</button>
+      </div>
+    </div>
+
+    <!-- Live Announcements Ticker Bar -->
+    <div class="announcement-ticker-bar">
+      <div class="atb-left">
+        <span class="atb-label">Live Updates</span>
+        <span class="atb-ticker-text" id="liveAnnouncementText">High Surge in Walled City: Explore Maharani Ki Chhatri & Bagru Artisan Corridor for a serene visit</span>
+      </div>
+      <button type="button" class="btn-link-xs" onclick="window.yatraApp.toggleCarouselPause()" title="Pause updates">Pause</button>
+    </div>
+
+    <!-- 5-Pillar Core Philosophy Strip -->
+    <div class="philosophy-strip-section">
+      <div class="pss-container">
+        <div class="pss-header">
+          <span class="pss-badge">CORE INTELLIGENCE ARCHITECTURE</span>
+          <h3>The 5 Pillars of Intelligent Tourism Recommendations</h3>
+          <p>How Safarnama generates 94% explainable match recommendations instead of generic star ratings.</p>
+        </div>
+        <div class="pss-pillars-grid">
+          <div class="pss-pillar">
+            <div class="pillar-num">01</div>
+            <h4>PEOPLE</h4>
+            <p>Interests, group dynamic (solo, couple, family), accessibility needs & cultural curiosities.</p>
+          </div>
+          <div class="pss-pillar">
+            <div class="pillar-num">02</div>
+            <h4>PLACES</h4>
+            <p>UNESCO monuments, secret stepwells, living artisan workshops & heritage culinary trails.</p>
+          </div>
+          <div class="pss-pillar">
+            <div class="pillar-num">03</div>
+            <h4>TIME</h4>
+            <p>Optimal sun angle, visiting duration, opening hours & logical East-to-West corridor routing.</p>
+          </div>
+          <div class="pss-pillar">
+            <div class="pillar-num">04</div>
+            <h4>CONDITIONS</h4>
+            <p>Midday UV heat index, rain probability, lighting levels & real-time footfall density.</p>
+          </div>
+          <div class="pss-pillar highlight">
+            <div class="pillar-num">05</div>
+            <h4>PRESSURE</h4>
+            <p>Active capacity monitoring, festival surge modeling & proactive redistribution to opportunity zones.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popular Destinations Grid Across India -->
+    <div class="popular-destinations-section">
+      <div class="landing-section-header">
+        <span class="lsh-badge">MULTI-DESTINATION COVERAGE</span>
+        <h2>Explore Flagship Destinations Across India</h2>
+        <p>Live capacity telemetry, weather intelligence, and curated heritage circuits.</p>
+      </div>
+
+      <div class="destinations-cards-grid" id="landingDestinationsGrid">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+
+    <!-- Under-Discovered Showcase Section -->
+    <div class="under-discovered-showcase-section">
+      <div class="landing-section-header">
+        <span class="lsh-badge">DEMAND REDISTRIBUTION</span>
+        <h2>Under-Discovered Gems vs. Overburdened Hotspots</h2>
+        <p>Save travel time and avoid overcrowding while experiencing world-class architecture.</p>
+      </div>
+
+      <div class="und-showcase-grid">
+        <div class="und-comparison-card">
+          <div class="ucc-hotspot">
+            <div class="ucc-tag danger">High Surge Hotspot (91% Cap)</div>
+            <h4>Hawa Mahal & Walled City</h4>
+            <p>Dense pedestrian traffic and bus queues between 11 AM – 4 PM.</p>
+          </div>
+          <div class="ucc-arrow">➔ <span>Redistribute to</span></div>
+          <div class="ucc-alternative">
+            <div class="ucc-tag opportunity">Opportunity Gem (-78% Crowd)</div>
+            <h4>Maharani Ki Chhatri</h4>
+            <p>Pristine white marble royal cenotaphs, peaceful shaded gardens, 4.2 km away.</p>
+            <button class="btn btn-xs btn-primary" onclick="window.yatraApp.openPlaceDetails('und-maharani-ki-chhatri')">View Gem</button>
+          </div>
+        </div>
+
+        <div class="und-comparison-card">
+          <div class="ucc-hotspot">
+            <div class="ucc-tag danger">High Surge Hotspot (90% Cap)</div>
+            <h4>Amer Fort Main Courtyard</h4>
+            <p>Peak congestion at elephant ramp and palace ticket turnstiles.</p>
+          </div>
+          <div class="ucc-arrow">➔ <span>Redistribute to</span></div>
+          <div class="ucc-alternative">
+            <div class="ucc-tag opportunity">Opportunity Gem (-72% Crowd)</div>
+            <h4>Panna Meena Ka Kund</h4>
+            <p>16th-century geometric stepwell with optical illusion stairs, 400m from fort.</p>
+            <button class="btn btn-xs btn-primary" onclick="window.yatraApp.openPlaceDetails('panna-meena-kund')">View Gem</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-Pillar Public Service Gateway Banner -->
+    <div class="dual-mode-banner-section">
+      <div class="dmb-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        <div class="dmb-card tourist">
+          <div class="ucc-tag" style="background: #E0E7FF; color: #3730A3; font-weight: 700; margin-bottom: 8px; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;">CITIZEN & TOURIST PORTAL</div>
+          <h3>Tourist Experience Companion</h3>
+          <p>94% explainable recommendations, 5-tab travel safety, Safarnama AI planner, and 11-slide Travel Wrapped.</p>
+          <button class="btn btn-primary" onclick="window.location.hash = '#explore'">Explore as Tourist</button>
+        </div>
+        <div class="dmb-card complaint" style="background: #FFFBEB; border: 1px solid #FCD34D;">
+          <div class="ucc-tag" style="background: #FEF3C7; color: #92400E; font-weight: 700; margin-bottom: 8px; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;">PUBLIC REDRESSAL</div>
+          <h3 style="color: #92400E;">Tourist Complaint Box</h3>
+          <p style="color: #78350F;">Report tourist safety, cleanliness, overcrowding, or infrastructure issues with instant official tracking ID.</p>
+          <button class="btn" style="background: #D97706; color: white; border: none; font-weight: 700;" onclick="window.location.hash = '#complaint-box'">Report an Issue</button>
+        </div>
+        <div class="dmb-card governance">
+          <div class="ucc-tag" style="background: #ECFDF5; color: #065F46; font-weight: 700; margin-bottom: 8px; display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px;">GOVERNMENT PORTAL</div>
+          <h3>Decision Support Dashboard</h3>
+          <p>Real-time carrying capacity monitoring, festival surge simulator, and citizen complaint intelligence.</p>
+          <button class="btn btn-secondary" onclick="window.location.hash = '#tourism-intelligence'">Open Decision Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Landing Footer -->
+    <footer class="landing-footer">
+      <div class="lf-top">
+        <div class="lf-brand">
+          <svg class="portal-logo-svg" width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="8" fill="#0F172A"/>
+            <path d="M10 11L18 20L26 11" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 20V26" stroke="#2563EB" stroke-width="2.75" stroke-linecap="round"/>
+            <circle cx="18" cy="8" r="2.2" fill="#2563EB"/>
+          </svg>
+              <strong>SAFARNAMA TOURISM INTELLIGENCE PLATFORM</strong>
+        </div>
+        <div class="lf-credits">Verified Public Tourism Intelligence & Decision Support System</div>
+      </div>
+      <div class="lf-bottom">
+        <p>Department of Tourism • Smart City Mission • Digital Public Infrastructure</p>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 3.1 TRAVEL ONBOARDING & ITINERARY VIEWS (Destination -> Prefs -> Itin)    -->
+  <!-- ========================================================================= -->
+  <section id="onboardingDestView" class="hidden"></section>
+  <section id="onboardingPrefView" class="hidden"></section>
+  <section id="itineraryResultView" class="hidden"></section>
+
+  <!-- ========================================================================= -->
+  <!-- 3.2 DEDICATED GOVERNMENT DECISION SUPPORT & COMPLAINT BOX VIEWS           -->
+  <!-- ========================================================================= -->
+  <section id="governanceView" class="hidden">
+    <div id="governancePanel"></div>
+  </section>
+
+  <section id="complaintView" class="hidden">
+    <div id="complaintBoxPanel"></div>
+  </section>
+
+  <section id="safarnamaView" class="hidden">
+    <div id="safarnamaPanel"></div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 4. MAIN APPLICATION WORKSPACE (Split Left Sidebar + Right Map Viewport)   -->
+  <!-- ========================================================================= -->
+  <!-- ========================================================================= -->
+  <div id="appWorkspace" class="app-container hidden">
+    <div class="workspace-split-body">
+      
+      <!-- Left Discovery & Itinerary Sidebar (32% Desktop) -->
+      <aside class="main-sidebar" id="mainSidebar">
+        <!-- Clean Sidebar Header -->
+        <div class="sidebar-dest-header">
+          <div class="sdh-title-row">
+            <div>
+              <span class="sdh-eyebrow">SAFARNAMA INTELLIGENCE</span>
+              <h2 class="sdh-title" id="destBannerTitle">Explore Jaipur</h2>
+            </div>
+            <button type="button" class="sidebar-collapse-toggle" onclick="window.yatraApp.toggleSidebar()" title="Collapse Panel">
+              ◀
+            </button>
+          </div>
+          <p class="sdh-subtitle">Discover places based on time, interests, crowd, and safety conditions.</p>
+
+          <div class="traveller-focus" aria-label="Travel style">
+            <div class="traveller-focus-heading">
+              <span>Plan for your group</span>
+              <span class="traveller-focus-note">Personalised picks</span>
+            </div>
+            <div class="traveller-focus-options">
+              <button type="button" class="traveller-focus-btn active" data-audience="all" onclick="window.yatraApp.setAudienceFilter('all', this)">Everyone</button>
+              <button type="button" class="traveller-focus-btn" data-audience="wheelchair" onclick="window.yatraApp.setAudienceFilter('wheelchair', this)">♿ Wheelchair</button>
+              <button type="button" class="traveller-focus-btn" data-audience="family" onclick="window.yatraApp.setAudienceFilter('family', this)">Family</button>
+            </div>
+          </div>
+
+          <!-- Search Input -->
+          <div class="sidebar-search-box">
+            <input type="text" id="sidebarPlaceSearch" class="sidebar-search-input" placeholder="Search destinations, monuments, bazaars..." oninput="window.yatraApp.handleSidebarSearch(this.value)" />
+          </div>
+
+          <!-- Quick Category Filters (Horizontal Row) -->
+          <div class="quick-filter-chips-row" id="quickFilterChipsRow">
+            <button type="button" class="qf-chip active" data-cat="all" onclick="window.yatraApp.setCategoryFilter('all', this)">All</button>
+            <button type="button" class="qf-chip" data-cat="historical" onclick="window.yatraApp.setCategoryFilter('historical', this)">Heritage</button>
+            <button type="button" class="qf-chip" data-cat="hidden-gems" onclick="window.yatraApp.setCategoryFilter('hidden-gems', this)">Hidden Gems</button>
+            <button type="button" class="qf-chip" data-cat="nature" onclick="window.yatraApp.setCategoryFilter('nature', this)">Nature</button>
+            <button type="button" class="qf-chip" data-cat="shopping" onclick="window.yatraApp.setCategoryFilter('shopping', this)">Local</button>
+            <button type="button" class="qf-chip" data-cat="food" onclick="window.yatraApp.setCategoryFilter('food', this)">Food</button>
+          </div>
+
+          <!-- View Segmented Controller -->
+          <div class="explore-segmented-control">
+            <button type="button" class="esc-btn active" id="escBtn_places" onclick="window.yatraApp.switchExploreSubView('places')">Places</button>
+            <button type="button" class="esc-btn" id="escBtn_gems" onclick="window.yatraApp.switchExploreSubView('gems')">Hidden Gems</button>
+            <button type="button" class="esc-btn" id="escBtn_routes" onclick="window.yatraApp.switchExploreSubView('routes')">Routes</button>
+          </div>
+
+          <!-- Collapsible "More Filters" Drawer -->
+          <div class="more-filters-accordion">
+            <button type="button" class="more-filters-toggle-btn" id="moreFiltersToggleBtn" onclick="window.yatraApp.toggleMoreFiltersDrawer()">
+              <span>More Filters (Accessibility, Time, Crowd)</span>
+              <span id="moreFiltersChevron">▾</span>
+            </button>
+            <div class="more-filters-drawer hidden" id="moreFiltersDrawer">
+              <div class="mfd-row">
+                <span class="mfd-label">Accessibility:</span>
+                <div class="mfd-checks">
+                  <label class="mfd-chk-label"><input type="checkbox" id="chk_wheelchair" onchange="window.yatraApp.handleFilterChange()" /> Wheelchair Accessible</label>
+                  <label class="mfd-chk-label"><input type="checkbox" id="chk_low_walking" onchange="window.yatraApp.handleFilterChange()" /> Low Walking</label>
+                </div>
+              </div>
+              <div class="mfd-row">
+                <span class="mfd-label">Duration:</span>
+                <div class="mfd-pills">
+                  <button type="button" class="mfd-pill active" onclick="window.yatraApp.setTimeFilter('all', this)">Any</button>
+                  <button type="button" class="mfd-pill" onclick="window.yatraApp.setTimeFilter('1-2', this)">1-2 Hrs</button>
+                  <button type="button" class="mfd-pill" onclick="window.yatraApp.setTimeFilter('half', this)">Half Day</button>
+                  <button type="button" class="mfd-pill" onclick="window.yatraApp.setTimeFilter('full', this)">Full Day</button>
+                </div>
+              </div>
+              <div class="mfd-footer-row">
+                <button type="button" class="btn-link-xs" onclick="window.yatraApp.resetSidebarFilters()">Reset All Filters</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scrollable Cards Body -->
+        <div class="sidebar-body">
+          <!-- 1. Places Explorer Panel (Default) -->
+          <div id="placesPanel" class="view-panel">
+            <div class="places-cards-grid" id="placesExplorerList"></div>
+          </div>
+
+          <!-- 2. Dedicated Hidden Jaipur Panel -->
+          <div id="gemsPanel" class="view-panel hidden"></div>
+
+          <!-- 3. Itinerary Panel -->
+          <div id="itineraryPanel" class="view-panel hidden"></div>
+
+          <!-- 4. Safety-Aware & Safer Routes Panel -->
+          <div id="saferRoutePanel" class="view-panel hidden"></div>
+
+          <!-- 5. Weather & Live Conditions Intel Panel -->
+          <div id="weatherPanel" class="view-panel hidden"></div>
+
+          <!-- 6. Travel Documents & Passes Panel -->
+          <div id="documentsPanel" class="view-panel hidden"></div>
+
+          <!-- 7. Profile, Scorecard & Passport Panel -->
+          <div id="profilePanel" class="view-panel hidden"></div>
+        </div>
+
+        <!-- Bottom Mobile Navigation Dock -->
+        <nav class="bottom-nav-dock">
+          <button type="button" class="bottom-nav-item active" data-view="places" onclick="window.location.hash = '#explore'">
+            <span class="bni-label">Explore</span>
+          </button>
+          <button type="button" class="bottom-nav-item" data-view="map" onclick="window.location.hash = '#map'">
+            <span class="bni-label">Map</span>
+          </button>
+          <button type="button" class="bottom-nav-item" data-view="safety" onclick="window.location.hash = '#safety'">
+            <span class="bni-label">Safety</span>
+          </button>
+          <button type="button" class="bottom-nav-item" data-view="trips" onclick="window.location.hash = '#trips'">
+            <span class="bni-label">Trips</span>
+          </button>
+          <button type="button" class="bottom-nav-item" data-view="profile" onclick="window.location.hash = '#profile'">
+            <span class="bni-label">Profile</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Right Large Interactive Leaflet Map Viewport (68% Desktop) -->
+      <main class="map-viewport">
+        <div id="map"></div>
+
+        <section class="map-briefing" aria-label="Trip map context">
+          <img class="map-briefing-mascot" src="assets/mascot.jpg" alt="Illustrated Yatra traveler">
+          <div class="map-briefing-kicker">YOUR JAIPUR TRIP</div>
+          <h2 id="mapTripTitle">Build your day as you go</h2>
+          <p id="mapTripCopy">Choose places in Explore and they will appear here in your trip order.</p>
+          <div class="map-trip-stats" id="mapTripStats"><strong>0</strong><span>stops saved</span></div>
+          <div class="map-briefing-tags">
+            <span>♿ Access notes</span>
+            <span> Family-ready</span>
+            <span> Live crowd signals</span>
+          </div>
+          <button type="button" class="map-briefing-action" onclick="window.location.hash = '#explore'">Add places to trip</button>
+        </section>
+
+        <!-- Single Clean Map Layers Floating Control Button -->
+        <div class="map-floating-layers-bar">
+          <div class="map-mode-label">TRIP MAP</div>
+          <button type="button" class="map-floating-layers-btn" onclick="window.yatraApp.toggleMapLayersPanel()" title="Toggle Map Layers">
+            Layers <span aria-hidden="true">⌄</span>
+          </button>
+        </div>
+
+        <div class="map-traveler-note">
+          <img src="assets/jaipur_tuktuk_rickshaw_1788591846275.jpg" alt="Illustrated Jaipur tuk-tuk">
+          <div><strong>Made for your pace</strong><span>Access notes • Family stops • Local picks</span></div>
+        </div>
+
+        <!-- Floating Interactive GIS Map Layers Toggle Panel -->
+        <div id="mapLayersDockPanel" class="map-layers-dock-panel hidden"></div>
+
+        <!-- Compact Bottom Sheet for Selected Destination -->
+        <div id="selectedMarkerSheet" class="selected-marker-sheet hidden"></div>
+
+        <!-- Bottom Navigation Step Banner -->
+        <div class="nav-step-banner hidden" id="navigationStepBanner"></div>
+
+        <!-- Bottom Right Map Zoom & GPS Controls -->
+        <div class="map-bottom-controls">
+          <button type="button" class="map-control-btn" onclick="window.mapEngine.map.zoomIn()" title="Zoom In">+</button>
+          <button type="button" class="map-control-btn" onclick="window.mapEngine.map.zoomOut()" title="Zoom Out">−</button>
+          <button type="button" class="map-control-btn" onclick="window.yatraApp.locateMe()" title="Center Current Location">GPS</button>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 5. MODALS & POPUP OVERLAYS                                                -->
+  <!-- ========================================================================= -->
+  <div id="authModal" class="hidden"></div>
+  <div id="onboardingModal" class="hidden"></div>
+  <div id="placeDetailModal" class="hidden"></div>
+  <div id="reelsModal" class="hidden reels-modal"></div>
+  <div id="aiPlannerModal" class="hidden"></div>
+  <div id="passportModal" class="hidden"></div>
+  <div id="wrappedModal" class="hidden"></div>
+  <div id="feedbackModal" class="hidden"></div>
+
+  <!-- Global App-like Mobile Bottom Navigation Dock (Visible only on mobile screens <= 768px) -->
+  <nav class="global-mobile-dock" id="globalMobileDock">
+    <a href="#landing" class="gmd-item active" data-gmd="landing">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Home</span>
+    </a>
+    <a href="#explore" class="gmd-item" data-gmd="explore">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span>Explore</span>
+    </a>
+    <a href="#map" class="gmd-item" data-gmd="map">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+      <span>Map</span>
+    </a>
+    <a href="#hidden-gems" class="gmd-item" data-gmd="gems">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 2 18 2 22 8 12 22 2 8 6 2"></polygon></svg>
+      <span>Gems</span>
+    </a>
+    <a href="#safety" class="gmd-item" data-gmd="safety">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      <span>Safety</span>
+    </a>
+    <a href="#complaint-box" class="gmd-item" data-gmd="complaint-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+      <span>Grievance</span>
+    </a>
+    <a href="#login" class="gmd-item" data-gmd="login" onclick="window.saffarnamaApp.openAuthModal('login'); return false;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span id="gmdLoginLabel">Login</span>
+    </a>
+  </nav>
+
+  <!-- Leaflet Library JS (Local vendor with CDN fallback) -->
+  <script src="vendor/leaflet.js"></script>
+  <script>
+    if (typeof L === 'undefined') {
+      document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\\/script>');
+    }
+  </script>
+
+  <!-- Application Main Controller (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
